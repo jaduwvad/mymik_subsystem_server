@@ -23,8 +23,12 @@ void Updater::updatePrice(string filename) {
         vector<string> articleAttr;
         myExplode(article, articleAttr);
 
-        string variantID = articleAttr.at(1);
-        string price = articleAttr.at(2);
+        string variantID = articleAttr.at(0);
+        string price = articleAttr.at(1);
+
+        if(!_conn.articleCheck(variantID))
+            continue;
+
         string priceWithoutTax = getPriceWithoutTax(price, variantID);
         string dateTime = getDateTime();
 
@@ -36,10 +40,13 @@ void Updater::updatePrice(string filename) {
 
 string Updater::getPriceWithoutTax(string price, string variantID) {
     float priceWithoutTax;
-    int taxRate = atoi(_conn.getTaxRate(variantID).c_str());
+    string taxRate = _conn.getTaxRate(variantID);
     char result[16];
 
-    switch(taxRate){
+    if(taxRate.c_str() == "000")
+        return "0";
+
+    switch(atoi(taxRate.c_str())){
         case 1:
             priceWithoutTax = atof(price.c_str())/1.19;
             break;
@@ -69,11 +76,7 @@ void Updater::updateInven(string filename, string tag) {
     _conn.invenUpdateSetting(tag);
 
     while(getline(ifile, article)) {
-        vector<string> articleAttr;
-
-        myExplode(article, articleAttr);
-
-        string variantID = articleAttr.at(1);
+        string variantID = article;
         _conn.invenUpdate(variantID);
         i++;
     }

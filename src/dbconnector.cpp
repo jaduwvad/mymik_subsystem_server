@@ -1,9 +1,13 @@
 #include "dbconnector.h"
+#include <cstdlib>
 
 using namespace std;
 
 DBConnector::DBConnector():
-{
+    server("localhost"),
+    user("mymik"),
+    password("geld7914"),
+    database("mmc"){
     MYSQL *connection = mysql_init(NULL);
 
     if(!mysql_real_connect(connection, server.c_str(), user.c_str(), password.c_str(), database.c_str(), 0, NULL, 0))
@@ -14,6 +18,25 @@ DBConnector::DBConnector():
 
 DBConnector::~DBConnector() {
     mysql_close(conn);
+}
+
+bool DBConnector::articleCheck(string variantID) {
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    string query;
+
+    query = "SELECT COUNT(*) FROM s_articles_details WHERE id = " + variantID;
+
+    res = mysqlPerformQuery(query);
+    row = mysql_fetch_row(res);
+
+    int c = atoi(row[0]);
+    mysql_free_result(res);
+
+    if(c == 0)
+        return false;
+    else
+        return true;
 }
 
 string DBConnector::getTaxRate(string variantID){

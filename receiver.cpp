@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <iostream>
+#include <time.h>
 #include "updater.h"
 
 #define MAX_LINE 1024
@@ -12,7 +13,17 @@
 using namespace std;
 
 string getFilename(string tag){
-    return "aff_" + tag + ".csv";
+    return tag + ".csv";
+}
+
+void showTime(){
+    struct tm *datetime;
+    time_t timer;
+    timer = time(NULL);
+    datetime = localtime(&timer);
+
+    cout<<datetime->tm_year + 1900<<"/"<<datetime->tm_mon + 1<<"/"<<datetime->tm_mday<<" ";
+    cout<<datetime->tm_hour<<":"<<datetime->tm_min<<":"<<datetime->tm_sec<<endl;
 }
 
 void str_echo(int sockfd) {
@@ -37,7 +48,18 @@ void str_echo(int sockfd) {
     memset(line, 0, MAX_LINE);
 }
 
+void updateShops(){
+    string tags[14] = {"ERP", "KST", "VTS", "SCA", "SA", "PTR", "ERP", "RSM", "APD", "AV", "ZR", "FLC", "RKT", "KHF"};
+    Updater u;
+    for(string tag:tags){
+        u.updateInven(getFilename(tag), tag);
+        u.updatePrice(getFilename(tag));
+    }
+}
+
 int main() {
+    //updateShops();
+
     int listenfd, connfd;
     socklen_t len;
     struct sockaddr_in servaddr, cliaddr;
@@ -68,6 +90,7 @@ int main() {
         cout<<"Client connected"<<endl;
         str_echo(connfd);
         close(connfd);
+        showTime();
         cout<<"Client exit"<<endl;
     }
 }

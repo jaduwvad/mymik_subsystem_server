@@ -8,6 +8,7 @@ public:
     DBConnector();
     ~DBConnector();
 
+    bool articleCheck(std::string variantID);
     std::string getTaxRate(std::string variantID);
     bool priceUpdateDetail(std::string price, std::string variantID);
     bool priceUpdate(std::string price, std::string variantID);

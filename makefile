@@ -24,7 +24,7 @@ libmaker: $(LIBPATH)
 	$(CC) $(SHARELIBFLAGS) $(LIBPATH)/libserv.so $(OBJPATH)/*
 
 receiver: receiver.cpp
-	$(CC) -o receiver receiver.cpp $(INCLUDEFLAG) $(DBFLAG) $(LIBFLAG)
+	$(CC) -o receiver receiver.cpp $(INCLUDEFLAG) $(DBFLAG) $(LIBFLAG) $(VERSIONFLAG)
 
 
 
