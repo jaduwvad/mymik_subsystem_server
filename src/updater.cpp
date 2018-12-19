@@ -6,45 +6,66 @@
 using namespace std;
 
 Updater::Updater():
-    _dataDir("/var/www/vhosts/my-mik.de/Sourcing_File/"),
-    _priceFileTag("price_"),
-    _invenFileTag("inven_") { }
+    _dataDir("/var/www/vhosts/my-mik.de/Sourcing_File/") { }
 
 Updater::~Updater() { }
 
-void Updater::updatePrice(string filename) {
-    string updateFile = _dataDir + _priceFileTag + filename;
+void Updater::updateArticle(string filename, string tag) {
+    string updateFile = _dataDir + filename;
     string article;
     ifstream ifile;
+    int i = 0;
 
     ifile.open(updateFile.c_str());
+
+    _conn.invenUpdateSetting(tag);
 
     while(getline(ifile, article)) {
         vector<string> articleAttr;
         myExplode(article, articleAttr);
 
         string variantID = articleAttr.at(0);
-        string price = articleAttr.at(1);
 
         if(!_conn.articleCheck(variantID))
             continue;
 
-        string priceWithoutTax = getPriceWithoutTax(price, variantID);
+        string price;
+        string priceWithoutTax;
+
+        if(tag == "WA"){
+            float priceWithoutTaxF = atof(articleAttr.at(1).c_str()) * 1.10;
+            float priceF = priceWithoutTaxF * 1.19;
+
+            char priceC[16];
+            char priceWithoutTaxC[16];
+
+            sprintf(priceC, "%.2f", priceF);
+            sprintf(priceWithoutTaxC, "%.2f", priceWithoutTaxF);
+
+            price = priceC;
+            priceWithoutTax = priceWithoutTaxC;
+        }
+        else {
+            string price = articleAttr.at(1);
+            string priceWithoutTax = getPriceWithoutTax(price, variantID, tag);
+        }
+
         string dateTime = getDateTime();
 
         _conn.priceUpdateDetail(price, variantID);
         _conn.priceUpdate(priceWithoutTax, variantID);
         _conn.priceUpdateDate(dateTime, variantID);
+        _conn.invenUpdate(variantID);
+
+        i++;
     }
+    cout<<filename<<" -> "<<i<<endl;
 }
 
-string Updater::getPriceWithoutTax(string price, string variantID) {
+string Updater::getPriceWithoutTax(string price, string variantID, string tag) {
     float priceWithoutTax;
     string taxRate = _conn.getTaxRate(variantID);
     char result[16];
-
-    if(taxRate.c_str() == "000")
-        return "0";
 
     switch(atoi(taxRate.c_str())){
         case 1:
@@ -63,25 +84,6 @@ string Updater::getPriceWithoutTax(string price, string variantID) {
     sprintf(result, "%.2f", priceWithoutTax);
 
     return result;
-}
-
-void Updater::updateInven(string filename, string tag) {
-    string updateFile = _dataDir + _invenFileTag + filename;
-    string article;
-    ifstream ifile;
-    int i=0;
-
-    ifile.open(updateFile.c_str());
-
-    _conn.invenUpdateSetting(tag);
-
-    while(getline(ifile, article)) {
-        string variantID = article;
-        _conn.invenUpdate(variantID);
-        i++;
-    }
-
-    cout<<i<<endl;
 }
 
 void Updater::myExplode(string s, vector<string>& result) {

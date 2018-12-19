@@ -40,8 +40,7 @@ void str_echo(int sockfd) {
             break;
 
         string s(line);
-        u.updateInven(getFilename(s), s);
-        u.updatePrice(getFilename(s));
+        u.updateArticle(getFilename(s), s);
         memset(line, 0, n);
     }
 
@@ -52,14 +51,12 @@ void updateShops(){
     string tags[14] = {"ERP", "KST", "VTS", "SCA", "SA", "PTR", "ERP", "RSM", "APD", "AV", "ZR", "FLC", "RKT", "KHF"};
     Updater u;
     for(string tag:tags){
-        u.updateInven(getFilename(tag), tag);
-        u.updatePrice(getFilename(tag));
+        u.updateArticle(getFilename(tag), tag);
     }
 }
 
 int main() {
     //updateShops();
-
     int listenfd, connfd;
     socklen_t len;
     struct sockaddr_in servaddr, cliaddr;
@@ -91,7 +88,7 @@ int main() {
         str_echo(connfd);
         close(connfd);
         showTime();
-        cout<<"Client exit"<<endl;
+        cout<<"Client exit"<<endl<<endl;
     }
 }
 
