@@ -5,10 +5,12 @@
 #include <string.h>
 #include <iostream>
 #include <time.h>
+#include <fstream>
+#include <time.h>
 #include "updater.h"
 
 #define MAX_LINE 1024
-#define PORT_NO 50000
+#define PORT_NO 17914
 
 using namespace std;
 
@@ -16,14 +18,24 @@ string getFilename(string tag){
     return tag + ".csv";
 }
 
-void showTime(){
-    struct tm *datetime;
-    time_t timer;
-    timer = time(NULL);
-    datetime = localtime(&timer);
+void writeLog(string s) {
+    ofstream logFile;
 
-    cout<<datetime->tm_year + 1900<<"/"<<datetime->tm_mon + 1<<"/"<<datetime->tm_mday<<" ";
-    cout<<datetime->tm_hour<<":"<<datetime->tm_min<<":"<<datetime->tm_sec<<endl;
+    logFile.open("/var/log/mymik/update_log", ios::app);
+    logFile<<s.c_str()<<endl;
+    logFile.close();
+}
+
+void showTime(){
+     char s[100];
+     time_t temp;
+     struct tm *timeptr;
+
+     temp = time(NULL);
+     timeptr = localtime(&temp);
+
+     strftime(s, sizeof(s), "%m/%d/%Y %R", timeptr);
+     writeLog(s);
 }
 
 void str_echo(int sockfd) {
@@ -40,7 +52,8 @@ void str_echo(int sockfd) {
             break;
 
         string s(line);
-        u.updateArticle(getFilename(s), s);
+        int updatedNum = u.updateArticle(getFilename(s), s);
+        writeLog(to_string(updatedNum) + " -> " + s);
         memset(line, 0, n);
     }
 
@@ -57,13 +70,16 @@ void updateShops(){
 
 int main() {
     //updateShops();
+    if(fork() != 0)
+        exit(1);
+
     int listenfd, connfd;
     socklen_t len;
     struct sockaddr_in servaddr, cliaddr;
 
     listenfd = socket(AF_INET, SOCK_STREAM, 0);
     if(listenfd < 0) {
-        cout<<"socket creation error"<<endl;
+        writeLog("socket creation error");
         return 0;
     }
 
@@ -73,22 +89,22 @@ int main() {
     servaddr.sin_port = htons(PORT_NO);
 
     if( bind(listenfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) <0) {
-        cout<<"bind error"<<endl;
+        writeLog("bind error");
         return 0;
     }
 
     listen(listenfd, 5);
-    cout<<"mymik subsystem update server run..."<<endl;
+    writeLog("mymik subsystem update server run...");
 
     while(true) {
         len = sizeof(cliaddr);
         connfd = accept(listenfd, (struct sockaddr *)&cliaddr, &len);
 
-        cout<<"Client connected"<<endl;
+        writeLog("Client connected");
         str_echo(connfd);
         close(connfd);
         showTime();
-        cout<<"Client exit"<<endl<<endl;
+        writeLog("Client exit\n");
     }
 }
 

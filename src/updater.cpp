@@ -10,7 +10,7 @@ Updater::Updater():
 
 Updater::~Updater() { }
 
-void Updater::updateArticle(string filename, string tag) {
+int Updater::updateArticle(string filename, string tag) {
     string updateFile = _dataDir + filename;
     string article;
     ifstream ifile;
@@ -46,8 +46,8 @@ void Updater::updateArticle(string filename, string tag) {
             priceWithoutTax = priceWithoutTaxC;
         }
         else {
-            string price = articleAttr.at(1);
-            string priceWithoutTax = getPriceWithoutTax(price, variantID, tag);
+            price = articleAttr.at(1);
+            priceWithoutTax = getPriceWithoutTax(price, variantID);
         }
 
         string dateTime = getDateTime();
@@ -59,10 +59,11 @@ void Updater::updateArticle(string filename, string tag) {
 
         i++;
     }
-    cout<<filename<<" -> "<<i<<endl;
+
+    return i;
 }
 
-string Updater::getPriceWithoutTax(string price, string variantID, string tag) {
+string Updater::getPriceWithoutTax(string price, string variantID) {
     float priceWithoutTax;
     string taxRate = _conn.getTaxRate(variantID);
     char result[16];
