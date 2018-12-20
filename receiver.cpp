@@ -100,11 +100,9 @@ int main() {
         len = sizeof(cliaddr);
         connfd = accept(listenfd, (struct sockaddr *)&cliaddr, &len);
 
-        writeLog("Client connected");
         str_echo(connfd);
         close(connfd);
         showTime();
-        writeLog("Client exit\n");
     }
 }
 

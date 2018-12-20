@@ -106,7 +106,7 @@ bool DBConnector::invenUpdateSetting(string tag) {
     MYSQL_RES *res;
     string query;
 
-    query = "UPDATE s_articles_details SET laststock=1 WHERE ordernumber LIKE \"" + tag + "-%%\"";
+    query = "UPDATE s_articles_details SET laststock=1 WHERE ordernumber LIKE \"" + tag + "-%\"";
     res = mysqlPerformQuery(query);
 
     mysql_free_result(res);
@@ -121,7 +121,22 @@ bool DBConnector::invenUpdate(string variantID) {
     MYSQL_RES *res;
     string query;
 
-    query = "UPDATE s_articles_details SET laststock=0 WHERE id=" + variantID;
+    query = "UPDATE s_articles_details SET laststock=0 WHERE id = " + variantID;
+    res = mysqlPerformQuery(query);
+
+    mysql_free_result(res);
+
+    if(res == 0)
+        return false;
+    else
+        return true;
+}
+
+bool DBConnector::invenUpdateEpilog(string tag) {
+    MYSQL_RES *res;
+    string query;
+
+    query = "UPDATE s_articles SET active=0 WHERE id IN (SELECT articleID FROM s_articles_details WHERE ordernumber LIKE \"" + tag + "-%\" AND laststock = 1)";
     res = mysqlPerformQuery(query);
 
     mysql_free_result(res);

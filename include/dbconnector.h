@@ -16,6 +16,7 @@ public:
 
     bool invenUpdateSetting(std::string tag);
     bool invenUpdate(std::string variantID);
+    bool invenUpdateEpilog(std::string tag);
 
 private:
     std::string server;

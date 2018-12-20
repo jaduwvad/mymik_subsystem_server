@@ -60,6 +60,8 @@ int Updater::updateArticle(string filename, string tag) {
         i++;
     }
 
+    _conn.invenUpdateEpilog(tag);
+
     return i;
 }
 
