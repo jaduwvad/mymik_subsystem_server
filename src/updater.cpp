@@ -10,14 +10,25 @@ Updater::Updater():
 
 Updater::~Updater() { }
 
+/**
+ * @brief	main update function
+ * @description	inven update process:
+ * 		1. set all laststock to 1
+ * 		2. set the article's laststock to 0
+ * 		   -> the article's variantID is in file, that article is active
+ * 		3. set all active to 0
+ * 		4. set the articles that it's laststock is 1 active to 0
+ */
 int Updater::updateArticle(string filename, string tag) {
     string updateFile = _dataDir + filename;
     string article;
     ifstream ifile;
     int i = 0;
 
+    //get update data from this file(variantID, price)
     ifile.open(updateFile.c_str());
 
+    //set all articles' laststock to 1 before update inven
     _conn.invenUpdateSetting(tag);
 
     while(getline(ifile, article)) {
@@ -32,6 +43,7 @@ int Updater::updateArticle(string filename, string tag) {
         string price;
         string priceWithoutTax;
 
+        //if the shop is wave, calc price and priceWithoutTax in wave's calc process
         if(tag == "WA"){
             float priceWithoutTaxF = atof(articleAttr.at(1).c_str()) * 1.10;
             float priceF = priceWithoutTaxF * 1.19;
@@ -45,6 +57,7 @@ int Updater::updateArticle(string filename, string tag) {
             price = priceC;
             priceWithoutTax = priceWithoutTaxC;
         }
+        //if not, other shop's calc process is same (at getPriceWithoutTax)
         else {
             price = articleAttr.at(1);
             priceWithoutTax = getPriceWithoutTax(price, variantID);
@@ -52,19 +65,28 @@ int Updater::updateArticle(string filename, string tag) {
 
         string dateTime = getDateTime();
 
+        //price -> s_articles_details purchaseprice
         _conn.priceUpdateDetail(price, variantID);
+        //priceWithoutTax -> s_articles_price price
         _conn.priceUpdate(priceWithoutTax, variantID);
+        //date -> s_articles_attributes attr2
         _conn.priceUpdateDate(dateTime, variantID);
         _conn.invenUpdate(variantID);
 
         i++;
     }
 
+    _conn.invenActiveSetting(tag);
     _conn.invenUpdateEpilog(tag);
 
     return i;
 }
 
+/**
+ * @brief	get price calc by tax rate
+ * @description	get the article's taxrate
+ * 		and calculate the price without tax by the taxrate
+ */
 string Updater::getPriceWithoutTax(string price, string variantID) {
     float priceWithoutTax;
     string taxRate = _conn.getTaxRate(variantID);

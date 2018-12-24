@@ -8,7 +8,7 @@ public:
     ~Updater();
 
     int updateArticle(std::string filename, std::string tag);
-    
+
 private:
     DBConnector _conn;
 
@@ -16,5 +16,6 @@ private:
 
     void myExplode(std::string s, std::vector<std::string>& result);
     std::string getDateTime();
+    //get matched article's price without tax. calc price by article's tax rate.
     std::string getPriceWithoutTax(std::string price, std::string variantID);
 };
