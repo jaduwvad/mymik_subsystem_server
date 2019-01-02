@@ -11,13 +11,13 @@ Updater::Updater():
 Updater::~Updater() { }
 
 /**
- * @brief	main update function
- * @description	inven update process:
- * 		1. set all laststock to 1
- * 		2. set the article's laststock to 0
- * 		   -> the article's variantID is in file, that article is active
- * 		3. set all active to 0
- * 		4. set the articles that it's laststock is 1 active to 0
+ * @brief	Main update function
+ * @description	Inven update process:
+ * 		1. Set all laststock to 1
+ * 		2. Set the article's laststock to 0
+ * 		   -> The article's variantID is in file, that article is active
+ * 		3. Set all active to 0
+ * 		4. Set the articles that it's laststock is 1 active to 0
  */
 int Updater::updateArticle(string filename, string tag) {
     string updateFile = _dataDir + filename;
@@ -25,10 +25,11 @@ int Updater::updateArticle(string filename, string tag) {
     ifstream ifile;
     int i = 0;
 
-    //get update data from this file(variantID, price)
+    //Get update data from this file
+    //Format : variantID, price
     ifile.open(updateFile.c_str());
 
-    //set all articles' laststock to 1 before update inven
+    //Set all articles' laststock to 1 before update inven
     _conn.invenUpdateSetting(tag);
 
     while(getline(ifile, article)) {
@@ -43,7 +44,7 @@ int Updater::updateArticle(string filename, string tag) {
         string price;
         string priceWithoutTax;
 
-        //if the shop is wave, calc price and priceWithoutTax in wave's calc process
+        //If the shop is wave, calc price and priceWithoutTax in wave's calc process
         if(tag == "WA"){
             float priceWithoutTaxF = atof(articleAttr.at(1).c_str()) * 1.10;
             float priceF = priceWithoutTaxF * 1.19;
@@ -57,7 +58,7 @@ int Updater::updateArticle(string filename, string tag) {
             price = priceC;
             priceWithoutTax = priceWithoutTaxC;
         }
-        //if not, other shop's calc process is same (at getPriceWithoutTax)
+        //If not, other shop's calc process is same (at getPriceWithoutTax)
         else {
             price = articleAttr.at(1);
             priceWithoutTax = getPriceWithoutTax(price, variantID);
@@ -83,8 +84,8 @@ int Updater::updateArticle(string filename, string tag) {
 }
 
 /**
- * @brief	get price calc by tax rate
- * @description	get the article's taxrate
+ * @brief	Get price calc by tax rate
+ * @description	Get the article's taxrate
  * 		and calculate the price without tax by the taxrate
  */
 string Updater::getPriceWithoutTax(string price, string variantID) {
@@ -111,6 +112,12 @@ string Updater::getPriceWithoutTax(string price, string variantID) {
     return result;
 }
 
+/**
+ * @brief	Separate string by delimiter ','
+ * @description	The result files separate data by ','
+ * 		So separate the string from result file by delimiter
+ * 		and save it to vector value to return
+ */
 void Updater::myExplode(string s, vector<string>& result) {
     string buff("");
 
@@ -125,6 +132,11 @@ void Updater::myExplode(string s, vector<string>& result) {
     if(buff != "") result.push_back(buff);
 }
 
+/**
+ * @brief	Get date and time in format
+ * @description	Return date and time data
+ * @format	YYYY-MM-DD HH:mm:SS
+ */
 string Updater::getDateTime() {
     time_t now = time(0);
     struct tm tstruct;
