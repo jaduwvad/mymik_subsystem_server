@@ -29,7 +29,8 @@ public:
     bool invenActiveSetting(std::string tag);
     //Inactive article that laststock is 1
     bool invenUpdateEpilog(std::string tag);
-
+    bool invenUpdateWrapup(std::string tag);
+    int amazonWhiteListCheck(std::string seller);
 private:
     std::string server;
     std::string user;

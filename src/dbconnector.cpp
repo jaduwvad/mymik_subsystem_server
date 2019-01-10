@@ -179,6 +179,23 @@ bool DBConnector::invenUpdate(string variantID) {
         return true;
 }
 
+int DBConnector::amazonWhiteListCheck(string seller){
+    MYSQL_RES *res;
+    MYSQL_ROW row;
+    string query;
+    string whiteList;
+
+    query = "SELECT COUNT(*) FROM a_Amazon_Seller WHERE name = \"" + seller + "\"";
+    res = mysqlPerformQuery(query);
+    row = mysql_fetch_row(res);
+
+    whiteList = row[0];
+
+    mysql_free_result(res);
+    
+    return atoi(whiteList.c_str());
+}
+
 /**
  * @brief	Udpate article's activation.
  * @description Check articles that laststock is 1.
@@ -190,6 +207,21 @@ bool DBConnector::invenUpdateEpilog(string tag) {
 
     //@query	Set article's active to 0 which's laststock is 1 and matched at tag
     query = "UPDATE s_articles SET active=0 WHERE id IN (SELECT articleID FROM s_articles_details WHERE ordernumber LIKE \"" + tag + "-%\" AND laststock = 1)";
+    res = mysqlPerformQuery(query);
+
+    mysql_free_result(res);
+
+    if(res == 0)
+        return false;
+    else
+        return true;
+}
+
+bool DBConnector::invenUpdateWrapup(string tag) {
+    MYSQL_RES *res;
+    string query;
+
+    query = "UPDATE s_articles_attributes SET attr16=1 WHERE articledetailsID IN (SELECT id FROM s_articles_details WHERE ordernumber LIKE \"" + tag + "-\" AND laststock = 1)";
     res = mysqlPerformQuery(query);
 
     mysql_free_result(res);

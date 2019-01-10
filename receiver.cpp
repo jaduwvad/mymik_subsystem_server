@@ -6,12 +6,15 @@
 
 using namespace std;
 
-string shops[16] = { "AMZ", "ATN", "FLC", "ZR", "WA", "SCA", "SA", "VTS", "PTR", "ERP", "RSM", "APD", "AV", "KST", "KHF", "RKT"};
-
 int main() {
-    if(fork() != 0)
+    if(lockKnock())
         exit(1);
 
+    if(fork() != 0)
+        exit(1);
+    else
+        setEnv();
+    
     int listenfd, connfd;
     socklen_t len;
     struct sockaddr_in servaddr, cliaddr;
@@ -44,6 +47,33 @@ int main() {
         close(connfd);
         showTime();
     }
+}
+
+/**
+ * @brief	Set environment files
+ * @description	Make lock file to check if the server is on used
+ * 		Make pid file to write the pid of the server program
+ */
+void setEnv(){
+    int pid = getpid();
+    ofstream pidFile(pidFileName);
+    ofstream lockFile(lockFileName);
+
+    pidFile<<pid;
+    lockFile.close();
+    pidFile.close();
+}
+
+/**
+ * @brief	Check the lock file
+ * @description	If the lock file is exist, return false
+ * 		if the file is not exist,  return true
+ */
+bool lockKnock(){
+    if(0 != access(lockFileName.c_str(), F_OK)) 
+        return false;
+    else
+        return true;
 }
 
 /**

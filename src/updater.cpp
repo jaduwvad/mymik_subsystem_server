@@ -36,6 +36,10 @@ int Updater::updateArticle(string filename, string tag) {
         vector<string> articleAttr;
         myExplode(article, articleAttr);
 
+        if(tag == "AMZ")
+            if(_conn.amazonWhiteListCheck(articleAttr.at(2)) == 0)
+                continue;
+
         string variantID = articleAttr.at(0);
 
         if(!_conn.articleCheck(variantID))
@@ -143,7 +147,16 @@ string Updater::getDateTime() {
     char temp[128];
 
     tstruct = *localtime(&now);
-    strftime(temp, sizeof(temp), "%Y-%m-%d %X", &tstruct);
+    strftime(temp, sizeof(temp), "%Y-%m-%d-%X", &tstruct);
 
-    return temp;
+   return temp;
 }
+
+
+
+
+
+
+
+
+
